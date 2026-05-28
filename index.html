@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>STS — Soliman Technology Solutions</title>
+<link rel="stylesheet" href="style.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ============ TOASTS ============ -->
+<div id="toasts" class="toasts" aria-live="polite"></div>
+
+<!-- ============ NAVBAR ============ -->
+<header class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="#" class="brand" onclick="showView('store');return false;">
+      <span class="logo-glow">STS</span>
+      <small data-i18n="tagline">Soliman Technology Solutions</small>
+    </a>
+    <div class="search-wrap">
+      <input id="liveSearch" type="text" data-i18n-ph="search_ph" placeholder="Search laptops..." autocomplete="off"/>
+      <div id="searchSuggest" class="suggest"></div>
+    </div>
+    <nav class="nav-actions">
+      <button class="icon-btn" id="langBtn" title="Language">🌐 <span id="langLabel">EN</span></button>
+      <button class="icon-btn" id="themeBtn" title="Theme">🌙</button>
+      <button class="icon-btn cart-btn" id="openCart">🛒<span class="badge" id="cartCount">0</span></button>
+      <button class="icon-btn" id="adminBtn" style="display:none" onclick="showView('admin')">⚙️</button>
+      <button class="icon-btn" id="authBtn" onclick="openAuth()">👤</button>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ STORE VIEW ============ -->
+<main id="view-store" class="view">
+  <section class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-content">
+      <h1 data-i18n="hero_title">Power. Precision. <span class="grad">Performance.</span></h1>
+      <p data-i18n="hero_sub">Premium laptops and computers — curated by STS.</p>
+      <button class="btn-primary" onclick="document.getElementById('catalog').scrollIntoView({behavior:'smooth'})" data-i18n="shop_now">Shop Now</button>
+    </div>
+  </section>
+
+  <section id="catalog" class="catalog">
+    <aside class="filters">
+      <h3 data-i18n="filters">Filters</h3>
+      <label data-i18n="price_range">Price Range</label>
+      <input type="range" id="priceMax" min="0" max="5000" value="5000" step="50"/>
+      <div class="row"><span>$0</span><span id="priceMaxVal">$5000</span></div>
+
+      <label data-i18n="condition">Condition</label>
+      <div id="condFilters" class="chips">
+        <label><input type="checkbox" value="New" checked> New</label>
+        <label><input type="checkbox" value="Used" checked> Used</label>
+        <label><input type="checkbox" value="Imported" checked> Imported</label>
+      </div>
+
+      <label data-i18n="brand">Brand</label>
+      <div id="brandFilters" class="chips"></div>
+      <button class="btn-ghost" onclick="resetFilters()" data-i18n="reset">Reset</button>
+    </aside>
+
+    <div class="products-wrap">
+      <div id="productGrid" class="product-grid"></div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ ADMIN VIEW ============ -->
+<main id="view-admin" class="view" style="display:none">
+  <div class="admin-wrap">
+    <h2>🛠 <span data-i18n="admin_dashboard">Admin Dashboard</span></h2>
+    <div class="stat-cards">
+      <div class="stat"><span data-i18n="total_products">Total Products</span><strong id="statProducts">0</strong></div>
+      <div class="stat"><span data-i18n="total_users">Total Users</span><strong id="statUsers">0</strong></div>
+      <div class="stat"><span data-i18n="pending_orders">Pending Orders</span><strong id="statOrders">0</strong></div>
+    </div>
+
+    <section class="admin-section">
+      <h3 data-i18n="manage_products">Manage Products</h3>
+      <form id="productForm" class="product-form">
+        <input type="hidden" id="pid"/>
+        <input required id="pname" placeholder="Name"/>
+        <input required id="pprice" type="number" step="0.01" placeholder="Price"/>
+        <input id="pbrand" placeholder="Brand"/>
+        <select id="pcondition">
+          <option>New</option><option>Used</option><option>Imported</option>
+        </select>
+        <input id="pimage" placeholder="Image URL"/>
+        <textarea id="pdesc" placeholder="Description"></textarea>
+        <button class="btn-primary" type="submit" data-i18n="save">Save</button>
+        <button type="button" class="btn-ghost" onclick="resetProductForm()" data-i18n="clear">Clear</button>
+      </form>
+      <table class="data-table" id="adminProductsTable"></table>
+    </section>
+
+    <section class="admin-section">
+      <h3 data-i18n="registered_users">Registered Users</h3>
+      <table class="data-table" id="adminUsersTable"></table>
+    </section>
+
+    <section class="admin-section">
+      <h3 data-i18n="orders">Orders</h3>
+      <table class="data-table" id="adminOrdersTable"></table>
+    </section>
+  </div>
+</main>
+
+<!-- ============ CART DRAWER ============ -->
+<aside id="cartDrawer" class="drawer">
+  <div class="drawer-head">
+    <h3 data-i18n="your_cart">Your Cart</h3>
+    <button class="icon-btn" onclick="toggleCart(false)">✕</button>
+  </div>
+  <div id="cartItems" class="drawer-body"></div>
+  <div class="drawer-foot">
+    <div class="total"><span data-i18n="total">Total</span> <strong id="cartTotal">$0</strong></div>
+    <button class="btn-primary" id="submitOrderBtn" data-i18n="submit_order">Submit Order</button>
+  </div>
+</aside>
+<div id="overlay" class="overlay" onclick="closeAll()"></div>
+
+<!-- ============ AUTH MODAL ============ -->
+<div id="authModal" class="modal">
+  <div class="modal-card">
+    <div class="tabs">
+      <button class="tab active" data-tab="login" data-i18n="login">Login</button>
+      <button class="tab" data-tab="register" data-i18n="register">Register</button>
+      <button class="icon-btn close" onclick="closeAll()">✕</button>
+    </div>
+
+    <form id="loginForm" class="auth-form">
+      <input required id="loginPhone" placeholder="Phone (01xxxxxxxxx)" maxlength="11"/>
+      <input required id="loginPass" type="password" placeholder="Password"/>
+      <button class="btn-primary" type="submit" data-i18n="login">Login</button>
+    </form>
+
+    <form id="registerForm" class="auth-form" style="display:none">
+      <div class="grid2">
+        <input required id="rFirst" placeholder="First name"/>
+        <input required id="rLast" placeholder="Last name"/>
+      </div>
+      <input required id="rPhone" placeholder="Phone (010/011/012/015)" maxlength="11"/>
+      <input required id="rPass" type="password" placeholder="Password"/>
+      <div class="meter"><div id="meterBar"></div></div>
+      <small id="meterText" class="hint">Password strength</small>
+      <button class="btn-primary" type="submit" data-i18n="create_account">Create Account</button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ INVOICE MODAL ============ -->
+<div id="invoiceModal" class="modal">
+  <div class="modal-card invoice">
+    <button class="icon-btn close" onclick="closeAll()">✕</button>
+    <h2>🧾 <span data-i18n="invoice">Digital Invoice</span></h2>
+    <div id="invoiceBody"></div>
+    <a id="waBtn" class="btn-wa" target="_blank" rel="noopener">💬 <span data-i18n="confirm_wa">Contact via WhatsApp to Confirm</span></a>
+  </div>
+</div>
+
+<footer class="footer">
+  <p>© <span id="year"></span> STS — Soliman Technology Solutions</p>
+</footer>
+
+<!-- Supabase JS via CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+</body>
+</html>
