@@ -27,11 +27,22 @@ img{max-width:100%;display:block}
   background:color-mix(in oklab,var(--bg) 75%,transparent);
   border-bottom:1px solid var(--border)}
 .nav-inner{max-width:1280px;margin:auto;display:flex;gap:14px;align-items:center;padding:12px 18px}
-.brand{display:flex;flex-direction:column;line-height:1}
-.brand .logo-glow{font-family:var(--display);font-weight:900;font-size:24px;
-  background:linear-gradient(90deg,var(--neon),var(--neon-2));-webkit-background-clip:text;color:transparent;
-  text-shadow:var(--neon-glow)}
-.brand small{color:var(--muted);font-size:11px;margin-top:2px}
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.brand-logo {
+  height: 55px; /* مقاس ممتاز للوجو في الشريط العلوي */
+  width: auto;
+  object-fit: contain;
+  border-radius: 8px; /* بيعمل نعومة بسيطة لحواف الصورة */
+  transition: transform var(--transition), filter var(--transition);
+}
+.brand-logo:hover {
+  transform: scale(1.05); /* اللوجو هيكبر شوية لما الماوس ييجي عليه */
+  filter: drop-shadow(0 0 10px rgba(34,211,238,0.5)); /* هيعمل توهج نيون خفيف حوالين اللوجو */
+}
 .search-wrap{flex:1;position:relative;max-width:520px}
 .search-wrap input{width:100%;padding:11px 14px;border-radius:999px;border:1px solid var(--border);
   background:var(--surface);color:var(--text);outline:none;transition:var(--transition)}
