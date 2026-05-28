@@ -253,7 +253,7 @@ function showInvoice(total){
     + `<div class="inv-total"><span>Total</span><span>$${total.toFixed(2)}</span></div>`;
   const itemsTxt=state.cart.map(i=>`${i.name} (x${i.qty})`).join(", ");
   const msg=`Hello STS, I am ${state.user.first_name} ${state.user.last_name}. I just placed an order for ${itemsTxt}. Total Price: $${total.toFixed(2)}. Please confirm my order.`;
-  document.getElementById("waBtn").href="https://wa.me/2012549194?text="+encodeURIComponent(msg);
+  document.getElementById("waBtn").href="https://wa.me/201212549194?text="+encodeURIComponent(msg);
   document.getElementById("invoiceModal").classList.add("show");
   document.getElementById("overlay").classList.add("show");
   toggleCart(false);
