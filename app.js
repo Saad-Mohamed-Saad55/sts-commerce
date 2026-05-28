@@ -108,12 +108,19 @@ document.getElementById("registerForm").addEventListener("submit",async e=>{
   const first=rFirst.value.trim(), last=rLast.value.trim(), phone=rPhone.value.trim(), pass=rPass.value;
   if(!validPhone(phone)) return toast("Phone must be 11 digits, start 010/011/012/015","error");
   if(pass.length<6) return toast("Password too short","error");
+  
   const hashed = await sha256(pass);
   const {data,error} = await sb.from("users").insert({first_name:first,last_name:last,phone,password:hashed}).select().single();
   if(error){ toast(error.message.includes("duplicate")?"Phone already registered":error.message,"error"); return; }
-  state.user=data; localStorage.setItem("sts_user",JSON.stringify(data)); refreshAuthUI(); closeAll();
-  toast("Welcome, "+data.first_name+"!","success"); loadProducts();
+  
+  // --- SMS Confirmation Logic (Mock system) ---
+  const confirmLink = window.location.origin + window.location.pathname + "?confirm=" + data.id;
+  alert(`📲 [MOCK SMS SYSTEM - STS]\n\nTo: ${phone}\nWelcome ${first}! Your account has been created.\nPlease click the link below to confirm your account:\n\n${confirmLink}`);
+  
+  toast("A confirmation SMS has been sent to your phone!","info");
+  closeAll();
 });
+
 document.getElementById("loginForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const phone=loginPhone.value.trim(), pass=loginPass.value;
@@ -124,6 +131,7 @@ document.getElementById("loginForm").addEventListener("submit",async e=>{
   state.user=data; localStorage.setItem("sts_user",JSON.stringify(data)); refreshAuthUI(); closeAll();
   toast("Welcome back, "+data.first_name+"!","success"); loadProducts();
 });
+
 function refreshAuthUI(){
   const btn=document.getElementById("authBtn");
   btn.textContent = state.user ? "👤 "+state.user.first_name : "👤";
@@ -137,15 +145,27 @@ async function loadProducts(){
   const {data,error}=await sb.from("products").select("*").order("created_at",{ascending:false});
   if(error){ toast(error.message,"error"); return; }
   state.products=data||[];
+  
+  // Fix: Dynamic max price update so expensive products don't get hidden
+  const maxDbPrice = Math.max(5000, ...state.products.map(p => Math.ceil(+p.price)));
+  const priceInput = document.getElementById("priceMax");
+  const oldMax = +priceInput.max;
+  priceInput.max = maxDbPrice;
+  if (+priceInput.value === oldMax || +priceInput.value > maxDbPrice) {
+      priceInput.value = maxDbPrice;
+  }
+
   buildBrandFilters();
   renderProducts();
 }
+
 function buildBrandFilters(){
   const brands=[...new Set(state.products.map(p=>p.brand))];
   document.getElementById("brandFilters").innerHTML = brands.map(b=>
     `<label><input type="checkbox" value="${b}" checked> ${b}</label>`).join("");
   document.querySelectorAll("#brandFilters input,#condFilters input").forEach(c=>c.addEventListener("change",renderProducts));
 }
+
 function renderProducts(){
   const grid=document.getElementById("productGrid");
   const maxP=+document.getElementById("priceMax").value;
@@ -183,8 +203,10 @@ document.getElementById("liveSearch").addEventListener("input",e=>{
 function pickSuggest(n){ document.getElementById("liveSearch").value=n; document.getElementById("searchSuggest").style.display="none"; renderProducts(); }
 
 document.getElementById("priceMax").addEventListener("input",renderProducts);
+
 function resetFilters(){
-  document.getElementById("priceMax").value=5000;
+  const priceInput = document.getElementById("priceMax");
+  priceInput.value = priceInput.max;
   document.querySelectorAll("#condFilters input,#brandFilters input").forEach(c=>c.checked=true);
   document.getElementById("liveSearch").value="";
   renderProducts();
@@ -341,3 +363,20 @@ document.getElementById("langBtn").addEventListener("click",()=>{
 /* ---------- INIT ---------- */
 document.getElementById("year").textContent=new Date().getFullYear();
 applyTheme(); applyLang(); refreshAuthUI(); renderCart(); loadProducts();
+
+// Check for SMS confirmation link on load
+const urlParams = new URLSearchParams(window.location.search);
+const confirmId = urlParams.get("confirm");
+if (confirmId) {
+  (async () => {
+    const {data, error} = await sb.from("users").select("*").eq("id", confirmId).maybeSingle();
+    if (data && !error) {
+      state.user = data;
+      localStorage.setItem("sts_user", JSON.stringify(data));
+      refreshAuthUI();
+      toast("Account confirmed successfully! Welcome " + data.first_name, "success");
+      // Remove query param cleanly without reloading
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  })();
+}
