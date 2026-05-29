@@ -89,7 +89,11 @@
         <select id="pcondition">
           <option>New</option><option>Used</option><option>Imported</option>
         </select>
-        <input id="pimage" placeholder="Image URL"/>
+        <div class="file-upload-group">
+  <input id="pimage" placeholder="Image URL (رابط خارجي)"/>
+  <span class="or-divider">أو ارفع من الجهاز:</span>
+  <input type="file" id="pfile" accept="image/*" />
+</div>
         <textarea id="pdesc" placeholder="Description"></textarea>
         <button class="btn-primary" type="submit" data-i18n="save">Save</button>
         <button type="button" class="btn-ghost" onclick="resetProductForm()" data-i18n="clear">Clear</button>
