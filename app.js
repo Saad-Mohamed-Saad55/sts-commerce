@@ -328,14 +328,57 @@ async function confirmOrder(id){
   if(error) return toast(error.message,"error");
   toast("Order confirmed","success"); loadAdmin();
 }
-document.getElementById("productForm").addEventListener("submit",async e=>{
+document.getElementById("productForm").addEventListener("submit", async e => {
   e.preventDefault();
-  const payload={name:pname.value,price:+pprice.value,brand:pbrand.value,condition:pcondition.value,image_url:pimage.value,description:pdesc.value};
-  const id=pid.value;
-  const op=id ? sb.from("products").update(payload).eq("id",id) : sb.from("products").insert(payload);
-  const {error}=await op;
-  if(error) return toast(error.message,"error");
-  toast(id?"Updated":"Created","success"); resetProductForm(); loadAdmin(); loadProducts();
+  
+  const fileInput = document.getElementById("pfile");
+  let finalImageUrl = pimage.value.trim(); // الرابط الافتراضي لو هو كاتب رابط
+
+  // لو الأدمن اختار صورة من الجهاز، هنرفعها الأول
+  if (fileInput.files.length > 0) {
+    const file = fileInput.files[0];
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`; // اسم مميز للصورة عشان مفيش حاجة تتبدل
+    
+    toast("جاري رفع الصورة...", "info");
+    
+    // رفع الصورة للـ Bucket اللي اسمه product-images
+    const { data: uploadData, error: uploadError } = await sb.storage
+      .from('product-images')
+      .upload(`laptops/${fileName}`, file);
+
+    if (uploadError) {
+      return toast("خطأ في رفع الصورة: " + uploadError.message, "error");
+    }
+
+    // بعد الرفع، نجيب الرابط العام (Public URL) بتاعها
+    const { data: { publicUrl } } = sb.storage
+      .from('product-images')
+      .getPublicUrl(`laptops/${fileName}`);
+      
+    finalImageUrl = publicUrl; // نحدث الرابط بالرابط المرفوع
+  }
+
+  // نحفظ البيانات في الجدول
+  const payload = {
+    name: pname.value,
+    price: +pprice.value,
+    brand: pbrand.value,
+    condition: pcondition.value,
+    image_url: finalImageUrl,
+    description: pdesc.value
+  };
+  
+  const id = pid.value;
+  const op = id ? sb.from("products").update(payload).eq("id", id) : sb.from("products").insert(payload);
+  
+  const { error } = await op;
+  if (error) return toast(error.message, "error");
+  
+  toast(id ? "تم التحديث بنجاح" : "تمت الإضافة بنجاح", "success"); 
+  resetProductForm(); 
+  loadAdmin(); 
+  loadProducts();
 });
 function editProduct(p){
   pid.value=p.id; pname.value=p.name; pprice.value=p.price; pbrand.value=p.brand;
