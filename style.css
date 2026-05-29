@@ -171,6 +171,43 @@ img{max-width:100%;display:block}
 .data-table button{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;margin-right:4px}
 .data-table button.danger{border-color:var(--danger);color:var(--danger)}
 
+.file-upload-group {
+  grid-column: 1 / -1; /* عشان ياخد العرض بالكامل */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg-2);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px dashed var(--border);
+}
+.or-divider {
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+.file-upload-group input[type="file"] {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+}
+.file-upload-group input[type="file"]::file-selector-button {
+  background: var(--surface-2);
+  color: var(--neon);
+  border: 1px solid var(--neon);
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-inline-end: 10px;
+  transition: var(--transition);
+}
+.file-upload-group input[type="file"]::file-selector-button:hover {
+  background: var(--neon);
+  color: #001018;
+}
+
 /* ============ TOASTS ============ */
 .toasts{position:fixed;top:80px;right:20px;display:flex;flex-direction:column;gap:10px;z-index:100;pointer-events:none}
 [data-lang="ar"] .toasts{right:auto;left:20px}
